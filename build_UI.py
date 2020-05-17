@@ -32,6 +32,9 @@ html = '''
   } 
 </style>
 <div class="flex-container">
+'''
+
+'''
         <div class="flex-item">
           <a href="/disease/21-hydroxylase-deficiency/about/" class="button-tile">
             <h3 class="dark-title">About</h3>
@@ -65,3 +68,66 @@ html = '''
         </div>
     </div>
 '''
+import csv
+
+human_proteins = set()
+corona_proteins = set()
+
+with open("data/human_proteins.tsv") as f:
+  next(f)
+  for line in f:
+    prot_idx = line.split('\t')[0]
+    human_proteins.add(prot_idx)
+
+with open("data/corona_virus_proteins.tsv") as f:
+  next(f)
+  for line in f:
+    prot_idx = line.split('\t')[0]
+    corona_proteins.add(prot_idx)
+
+drug_bank = set()
+with open("data/structure_links.csv") as f:
+  reader = csv.DictReader(f)
+  for d in reader:
+    chem_idx = d['ChEMBL ID'].strip()
+    drug_bank.add(chem_idx)
+
+targs = {}
+with open("data/pair_counts_dtd_drugbank_uni_1_2_scored.txt") as f:
+  next(f)
+  for line in f:
+    l = line.split(',')
+    prot = l[0].split("#")[1]
+    chem = l[1].split("#")[1]
+    if("CHEMBL" not in chem):
+      print("BAD",line)
+      exit()
+    if(chem not in drug_bank):
+      raise ValueError("Drug not in referenced DrugBank database.",chem)
+    if(prot not in human_proteins and prot not in corona_proteins):
+      raise ValueError("Target not in referenced UniProt database.",prot)
+    s = targs.get(prot,set())
+    s.add(chem)
+    targs[prot] = s 
+
+keys = list(targs.keys())
+keys.sort()
+for k in keys:
+  print(k,len(targs[k]))
+
+def buildFlex(k,targs):
+    html = '''        <div class="flex-item">
+          <a href="%s" class="button-tile">
+            <h3 class="dark-title">%s</h3>
+            <p class="dark-text">%d drugs found in our database.</p>
+          </a>
+        </div>
+'''
+    link = "http://coke.mml.unc.edu/static/dtd_table.html#%s" % k
+    html = html % (link, k,len(targs[k]))
+    return html
+for k in keys:
+  x = buildFlex(k,targs)
+  html += x
+html += "    </div>"
+with open("index.html",'w') as f: f.write(html)
