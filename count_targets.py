@@ -1,22 +1,29 @@
 import csv
-targs = {}
+
+human_proteins = set()
+corona_proteins = set()
+
+with open("data/human_proteins.tsv") as f:
+  next(f)
+  for line in f:
+    prot_idx = line.split('\t')[0]
+    human_proteins.add(prot_idx)
+
+with open("data/corona_virus_proteins.tsv") as f:
+  next(f)
+  for line in f:
+    prot_idx = line.split('\t')[0]
+    corona_proteins.add(prot_idx)
+
 drug_bank = set()
-with open("structure_links.csv") as f:
+with open("data/structure_links.csv") as f:
   reader = csv.DictReader(f)
   for d in reader:
-    chem = d['ChEMBL ID'].strip()
-#    if(chem in drugs):print('HI')
-    if(len(chem)>2):
-      #print(chem)
-      drug_bank.add(chem)
-from tabulate import tabulate
+    chem_idx = d['ChEMBL ID'].strip()
+    drug_bank.add(chem_idx)
 
-
-#tabulate([["strings", "numbers"], ["spam", 41.9999], ["eggs", "451.0"]],
-#    ...                headers="firstrow", tablefmt="html")
-
-
-with open("pair_counts_dtd_1_2_scored.txt") as f:
+targs = {}
+with open("data/pair_counts_dtd_drugbank_uni_1_2_scored.txt") as f:
   next(f)
   for line in f:
     l = line.split(',')
@@ -25,7 +32,10 @@ with open("pair_counts_dtd_1_2_scored.txt") as f:
     if("CHEMBL" not in chem):
       print("BAD",line)
       exit()
-    if(chem not in drug_bank):continue
+    if(chem not in drug_bank):
+      raise ValueError("Drug not in referenced DrugBank database.",chem)
+    if(prot not in human_proteins and prot not in corona_proteins):
+      raise ValueError("Target not in referenced UniProt database.",prot)
     s = targs.get(prot,set())
     s.add(chem)
     targs[prot] = s 
@@ -40,14 +50,23 @@ def updateDict(d):
   for x in d:
     d2[x] = d[x]
   d2["Entry"] = '<a href="https://www.uniprot.org/uniprot/%s">%s</a>' %(d["Entry"],d["Entry"])
+  d2["Drug_Count"] = '<a href="http://coke.mml.unc.edu/static/dtd_table.html#%s">%s</a>' %(d[ "Entry"],d["Drug_Count"])
 #  d2["Entry name"] = '<a href="https://www.uniprot.org/uniprot/%s">%s</a>' %(d["Entry"],d["Entry"])
   return d2
 
 table = []
 with  open("target_info.html",'w') as f2:
-  csvfile = open("uniprot_targs2.txt")
-  reader = csv.DictReader(csvfile,delimiter='|')
+  csvfile = open("data/corona_virus_proteins.tsv")
+  reader = csv.DictReader(csvfile,delimiter='\t')
+  targets = list(reader)
+  csvfile.close()
+
   fields = reader.fieldnames
+  csvfile = open("data/human_proteins.tsv")
+  reader = csv.DictReader(csvfile,delimiter='\t')
+  targets.extend(list(reader))
+  csvfile.close()
+
   fields.append("Drug_Count")
   table.append(fields)
   f2.write('''<style>
@@ -64,11 +83,10 @@ with  open("target_info.html",'w') as f2:
   for x in fields:
     f2.write("<th>%s</th>"%x)
   f2.write("</tr>\n")
-#  writer = csv.DictWriter(f2,fields)
-#  writer.writeheader()
-  for d in reader:
-    #cnt = len(targs[d['Entry']])
+  
+  for d in targets:
     cnt = len(targs.get(d['Entry'],[]))
+
     d['Drug_Count'] = cnt
     if(cnt==0):continue
     d = updateDict(d)
@@ -78,13 +96,15 @@ with  open("target_info.html",'w') as f2:
     f2.write("</tr>\n")
 #    writer.writerow(d)
 #  f2.write("\n\n")
-  csvfile = open("uniprot_targs2.txt")
-  reader = csv.DictReader(csvfile,delimiter='|')
-  for d in reader:
+#  csvfile = open("uniprot_targs2.txt")
+#  reader = csv.DictReader(csvfile,delimiter='|')
+  for d in targets:
     #cnt = len(targs[d['Entry']])
     cnt = len(targs.get(d['Entry'],[]))
+
     d['Drug_Count'] = cnt
-    if(cnt!=0):continue
+    if(cnt==0):continue
+
     d = updateDict(d)
     f2.write("<tr>")
     for x in fields:

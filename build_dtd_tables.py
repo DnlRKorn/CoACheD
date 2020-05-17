@@ -3,7 +3,7 @@ drugs = []
 pairs = {} 
 #with open("advanced_pair_counts_dtd_scored.csv") as f:
 #  next(f)
-with open("pair_counts_dtd_1_2_scored.txt") as f:
+with open("data/pair_counts_dtd_drugbank_uni_1_2_scored.txt") as f:
   next(f)
   for line in f:
     drug = line.split(',')[1]
@@ -17,7 +17,7 @@ with open("pair_counts_dtd_1_2_scored.txt") as f:
 print(len(drugs),len(set(drugs)))
 drugs = set(drugs)
 drug_bank = set()
-with open("structure_links.csv") as f:
+with open("data/structure_links.csv") as f:
   reader = csv.DictReader(f)
   for d in reader:
     chem = d['ChEMBL ID'].strip()
@@ -34,7 +34,7 @@ inter = drugs.intersection(drug_bank)
 cnt=0
 papers = {}
 scores = {}
-with open("pair_counts_dtd_1_2_scored.txt") as f:
+with open("data/pair_counts_dtd_drugbank_uni_1_2_scored.txt") as f:
   next(f)
   for line in f:
     drug = line.split(',')[1]
@@ -54,7 +54,7 @@ drug_ids = set()
 chem_to_bank = {}
 print(drug_ids)
 
-with open("structure_links.csv") as f:
+with open("data/structure_links.csv") as f:
   #header = next(f)
   reader = csv.DictReader(f)
   for d in reader:
@@ -71,7 +71,7 @@ bank_ids_to_uni = {}
 for x in bank_ids:
   bank_ids_to_uni[x] = set()
 
-with open("uniprot_links.csv") as f:
+with open("data/uniprot_links.csv") as f:
   reader = csv.DictReader(f)
   for d in reader:
     bank = d["DrugBank ID"]
@@ -111,25 +111,24 @@ tup_count = 0
 with open("dtd_table.html",'w') as f:
   
    f.write('''
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css"/>
       
-      <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.js"></script>
 
-   <style>
+<style>
   table {
     border-collapse: collapse;
-    }
+  }
 
-    table, th, td {
+  table, th, td {
       border: 1px solid black;
-      }
-          </style>
-          ''')
+  }
+</style>
+''')
    for targ in pairs:
-      #f.write(targ +":\n")
+      f.write('<section id="%s">' % targ )
       f.write('<a href="https://www.uniprot.org/uniprot/%s">%s</a>:\n' % (targ,targ))
-      #f.write("<tr>"+targ + ":</tr>\n")
       f.write("<table>\n")
       writer = csv.DictWriter(f,["Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets","Score","Paper Links"],extrasaction="ignore")
       f.write("<thead><tr>")
@@ -137,8 +136,7 @@ with open("dtd_table.html",'w') as f:
          f.write("<th>"+x+"</th>")
       f.write("</tr></thead>\n<tbody>\n")
 
-      #writer.writeheader()
-      with open("structure_links_filtered.csv") as f2:
+      with open("data/structure_links_filtered.csv") as f2:
          reader = csv.DictReader(f2)
          for d in reader:
            chem = d['ChEMBL ID'].strip()
@@ -152,15 +150,20 @@ with open("dtd_table.html",'w') as f:
              d = convertDict(d)
              f.write("<tr>")
              for x in ["Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets","Score","Paper Links"]:
-               f.write("<td>"+d[x]+"</td>")
+               f.write("<td>"+d[x]+"</td>\n")
              f.write("</tr>\n")
 #             writer.writerow(d)
-      f.write('''</tbody></table>\n
-      <script>
-      $("table").dataTable()
-      </script>
-      ''')
+      f.write("</tbody></table>\n")
       f.write("\n\n")
+      f.write('</section">')
+   f.write('''
+   <script>
+   //$("table").dataTable()
+   $( "table" ).each(function() {
+     $( this ).dataTable();
+     });
+   </script>
+   ''')
 #   f.write("<table>\n")
 
 print(drug_ids)
