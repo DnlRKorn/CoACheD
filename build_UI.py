@@ -123,11 +123,11 @@ def buildFlex(k,targs):
           </a>
         </div>
 '''
-    link = "http://coke.mml.unc.edu/static/dtd_table.html#%s" % k
+    link = "http://coke.mml.unc.edu/static/dtd_table_json.html#%s" % k
     html = html % (link, k,len(targs[k]))
     return html
 for k in keys:
   x = buildFlex(k,targs)
   html += x
 html += "    </div>"
-with open("index.html",'w') as f: f.write(html)
+with open("better_ui.html",'w') as f: f.write(html)
