@@ -124,6 +124,14 @@ with open("dtd_table_json.html",'w') as f:
   table, th, td {
       border: 1px solid black;
   }
+  table.dataTable tbody td {
+      word-break: break-word;
+      vertical-align: top;
+  }
+  
+  ul { 
+     list-style-type:none;
+  }
 </style>
 ''')
    for targ in pairs:
@@ -134,7 +142,7 @@ with open("dtd_table_json.html",'w') as f:
       f.write("<thead><tr>")
       for x in ["Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets","Score","Paper Links"]:
          f.write("<th>"+x+"</th>")
-      f.write("</tr></thead></table>\n")
+      f.write("</tr></thead></table>\n</section>\n")
 
    f.write('''
    <script>
@@ -143,7 +151,11 @@ with open("dtd_table_json.html",'w') as f:
              var x = $(this)[0].id; 
              console.log(x); 
              $(this).DataTable( {
-                  "ajax": '/static/'+x+'.json'
+                  "ajax": '/static/'+x+'.json',
+                  "autoWidth": false,
+                 // "scrollY":"1000px",
+                 // "scrollCollapse":true
+
              });
          });
      });

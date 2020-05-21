@@ -96,12 +96,14 @@ def convertDict(d):
     #d2["Other Targets"] = d["Other Targets"]
     d2["Other Targets"] = '<a href="https://www.drugbank.ca/drugs/%s#targets">%s</a>' % (d_b,d["Other Targets"])
 #      "Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets"],extrasaction="ignore")
-    li_txt = "<ul>"
+
+    li_txt = '<div style="height:100px; overflow-y:scroll;">'
+    #li_txt = '<div style="height:100px; overflow-y:scroll;"><ul>'
     for paper in papers[(targ,drug)]:
       link = "http://35.196.80.123/highlight?paper=%s&term1=CVPROT%%23%s&term2=DRUG%%23%s" % (paper,targ,drug)
-      li_txt+='<li><a href="%s">%s</a></li>' %(link,paper)
+      li_txt+='<a href="%s">%s</a></br></br>' %(link,paper)
 
-    li_txt += "</ul>"
+    li_txt += "</div>"
     d2["Paper Links"] = li_txt
     d2["Score"] = scores[(targ,drug)]
     return d2
