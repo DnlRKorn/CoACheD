@@ -20,6 +20,9 @@
   ul { 
      list-style-type:none;
   }
+  table.dataTable tbody td.no_break {
+      word-break: normal;
+  }
 </style>
 <section id="P59596"><a href="https://www.uniprot.org/uniprot/P59596">P59596</a>:
 <table id="P59596">
@@ -166,6 +169,9 @@
              $(this).DataTable( {
                   "ajax": '/static/'+x+'.json',
                   "autoWidth": false,
+		  "columnDefs": [
+                     { className: "no_break", "targets": [ 1,2,3 ] }
+		  ]
                  // "scrollY":"1000px",
                  // "scrollCollapse":true
 

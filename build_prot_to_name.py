@@ -105,7 +105,7 @@ def convertDict(d):
 
     li_txt += "</div>"
     d2["Paper Links"] = li_txt
-    d2["Score"] = "%.2f" % float(scores[(targ,drug)])
+    d2["Score"] = scores[(targ,drug)]
     return d2
 
 
@@ -133,24 +133,3 @@ for targ in pairs:
      json.dump(json_data,f)
 
 
-j = []
-for targ in pairs:
-   with open("data/structure_links_filtered.csv") as f2:
-         reader = csv.DictReader(f2)
-         for d in reader:
-           chem = d['ChEMBL ID'].strip()
-           if(chem in pairs[targ]):
-             #tup_count+=1
-             bank = d["DrugBank ID"]
-             cnt = d["Targets"]
-             smile = d["SMILES"]
-             d["Target"] = targ
-             d["Other Targets"] = cnt
-             d = convertDict(d)
-             l = []
-             for x in ["Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets","Score","Paper Links"]:
-               l.append(d[x])
-             j.append(l)
-json_data = {"data":j}
-with open("data/singleton.json",'w') as f:
-   json.dump(json_data,f)

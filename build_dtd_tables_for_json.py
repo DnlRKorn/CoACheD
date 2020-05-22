@@ -132,6 +132,9 @@ with open("dtd_table_json.html",'w') as f:
   ul { 
      list-style-type:none;
   }
+  table.dataTable tbody td.no_break {
+      word-break: normal;
+  }
 </style>
 ''')
    for targ in pairs:
@@ -153,6 +156,72 @@ with open("dtd_table_json.html",'w') as f:
              $(this).DataTable( {
                   "ajax": '/static/'+x+'.json',
                   "autoWidth": false,
+		  "columnDefs": [
+                     { className: "no_break", "targets": [ 1,2,3 ] }
+		  ]
+                 // "scrollY":"1000px",
+                 // "scrollCollapse":true
+
+             });
+         });
+     });
+//           $('#example').DataTable( {
+//                "ajax": '/static/P59634.json'
+//             } )
+   </script>
+   ''')
+
+with open("dtd_table_singleton.html",'w') as f:
+  
+   f.write('''
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css"/>
+      
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.js"></script>
+
+<style>
+  table {
+    border-collapse: collapse;
+  }
+
+  table, th, td {
+      border: 1px solid black;
+  }
+  table.dataTable tbody td {
+      word-break: break-word;
+      vertical-align: top;
+  }
+  
+  ul { 
+     list-style-type:none;
+  }
+  table.dataTable tbody td.no_break {
+      word-break: normal;
+  }
+</style>
+''')
+   for targ in ["singleton"]:
+      f.write('<section id="%s">' % targ )
+      f.write('All Targets:\n')
+      f.write('<table id="%s">\n' % targ)
+      writer = csv.DictWriter(f,["Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets","Score","Paper Links"],extrasaction="ignore")
+      f.write("<thead><tr>")
+      for x in ["Target","Name","DrugBank ID","ChEMBL ID","SMILES","Other Targets","Score","Paper Links"]:
+         f.write("<th>"+x+"</th>")
+      f.write("</tr></thead></table>\n</section>\n")
+
+   f.write('''
+   <script>
+    $(document).ready(function() {
+         $( "table" ).each(function(){ 
+             var x = $(this)[0].id; 
+             console.log(x); 
+             $(this).DataTable( {
+                  "ajax": '/static/'+x+'.json',
+                  "autoWidth": false,
+		  "columnDefs": [
+                     { className: "no_break", "targets": [ 1,2,3 ] }
+		  ]
                  // "scrollY":"1000px",
                  // "scrollCollapse":true
 

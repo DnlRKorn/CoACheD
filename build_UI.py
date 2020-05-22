@@ -1,10 +1,11 @@
+
 html = '''
 <style>
   .flex-container {
   flex-direction: row-reverse;
     display: flex;
     flex-wrap: wrap;
-	  line-height: 75px;
+    /*line-height: 75px;*/
     justify-content: center;
     padding: 0;
     margin: 0;
@@ -72,18 +73,22 @@ import csv
 
 human_proteins = set()
 corona_proteins = set()
+prot_names = {}
 
 with open("data/human_proteins.tsv") as f:
   next(f)
   for line in f:
     prot_idx = line.split('\t')[0]
     human_proteins.add(prot_idx)
-
+    prot_name = line.split('\t')[3].split('(')[0]
+    prot_names[prot_idx] = prot_name
 with open("data/corona_virus_proteins.tsv") as f:
   next(f)
   for line in f:
     prot_idx = line.split('\t')[0]
     corona_proteins.add(prot_idx)
+    prot_name = line.split('\t')[3].split('(')[0]
+    prot_names[prot_idx] = prot_name
 
 drug_bank = set()
 with open("data/structure_links.csv") as f:
@@ -119,12 +124,13 @@ def buildFlex(k,targs):
     html = '''        <div class="flex-item">
           <a href="%s" class="button-tile">
             <h3 class="dark-title">%s</h3>
+            <h4>%s</h4>
             <p class="dark-text">%d drugs found in our database.</p>
           </a>
         </div>
 '''
-    link = "http://coke.mml.unc.edu/static/dtd_table_json.html#%s" % k
-    html = html % (link, k,len(targs[k]))
+    link = "https://coke.mml.unc.edu/static/dtd_table_json.html#%s" % k
+    html = html % (link, k,prot_names[k],len(targs[k]))
     return html
 for k in keys:
   x = buildFlex(k,targs)
